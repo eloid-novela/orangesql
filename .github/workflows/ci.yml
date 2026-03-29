@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: ${{ matrix.os }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Debug, Release]
+        include:
+          - os: ubuntu-latest
+            triplet: x64-linux
+          - os: macos-latest
+            triplet: x64-osx
+          - os: windows-latest
+            triplet: x64-windows
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libreadline-dev
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install readline
+
+    - name: Install vcpkg (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+        echo "VCPKG_ROOT=$PWD/vcpkg" >> $GITHUB_ENV
+
+    - name: Install vcpkg (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        .\vcpkg\bootstrap-vcpkg.bat
+        echo "VCPKG_ROOT=$pwd\vcpkg" >> $env:GITHUB_ENV
+
+    - name: Install vcpkg dependencies
+      run: |
+        ${{ env.VCPKG_ROOT }}/vcpkg install \
+          nlohmann-json \
+          gtest \
+          --triplet ${{ matrix.triplet }}
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DBUILD_TESTS=ON \
+          -DBUILD_BENCHMARKS=OFF
+
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }} -j4
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure -C ${{ matrix.build_type }} --timeout 60
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: orangesql-${{ matrix.os }}-${{ matrix.build_type }}
+        path: build/bin/
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lcov libreadline-dev
+    
+    - name: Configure with coverage
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_TESTS=ON \
+          -DENABLE_COVERAGE=ON
+    
+    - name: Build
+      run: cmake --build build -j4
+    
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure --timeout 60
+    
+    - name: Generate coverage report
+      run: |
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*/tests/*' '*/vcpkg/*' --output-file coverage.info
+        lcov --list coverage.info
+    
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: coverage.info
+        flags: unittests
+        name: codecov-umbrella
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libreadline-dev
+    
+    - name: Configure with sanitizers
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_TESTS=ON \
+          -DENABLE_SANITIZERS=ON
+    
+    - name: Build
+      run: cmake --build build -j4
+    
+    - name: Run tests with sanitizers
+      working-directory: build
+      run: ctest --output-on-failure --timeout 60
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check code format
+      uses: jidicula/clang-format-action@v4.10.0
+      with:
+        clang-format-version: '14'
+        check-path: '.'

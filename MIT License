@@ -1,0 +1,22 @@
+
+## 8. **cmake/OrangeSQLConfig.cmake.in** - Configuração para find_package
+
+```cmake
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Dependências
+find_dependency(Threads)
+find_dependency(nlohmann_json)
+
+# Incluir targets
+if(NOT TARGET orangesql::orangesql_core)
+    include("${CMAKE_CURRENT_LIST_DIR}/OrangeSQLTargets.cmake")
+endif()
+
+# Definir variáveis
+set(ORANGESQL_VERSION @PROJECT_VERSION@)
+set(ORANGESQL_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include")
+
+check_required_components(orangesql)

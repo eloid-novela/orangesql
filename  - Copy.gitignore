@@ -1,0 +1,131 @@
+# Build directories
+/build/
+/cmake-build-*/
+/out/
+/target/
+
+# IDE files
+/.idea/
+/.vscode/
+/*.code-workspace
+/*.sln
+/*.suo
+/*.vcxproj
+/*.vcxproj.filters
+/*.vcxproj.user
+/CMakeSettings.json
+
+# Compiled files
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.lib
+*.a
+*.exe
+*.out
+*.app
+
+# Test outputs
+*.log
+*.tap
+*.trs
+/test-results/
+/Testing/
+
+# Coverage files
+*.gcda
+*.gcno
+*.gcov
+/coverage/
+/coverage.info
+
+# Profiling files
+*.prof
+*.profraw
+*.gcov
+callgrind.out.*
+perf.data*
+
+# Documentation
+/docs/html/
+/docs/latex/
+/docs/man/
+/docs/xml/
+/*.tag
+
+# Dependencies
+/vcpkg/
+/CMakeUserPresets.json
+
+# Data directories
+/data/tables/
+/data/wal/
+/data/system/
+/data/temp/
+/data/backup/
+/*.db
+/*.sqlite
+/*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Benchmark outputs
+*.bench
+*.benchmark
+
+# Package files
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+*.dmg
+*.pkg
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
+# Secrets
+*.pem
+*.key
+*.crt
+secrets/
+secrets.*

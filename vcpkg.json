@@ -1,0 +1,42 @@
+{
+  "name": "orangesql",
+  "version": "1.0.0",
+  "description": "ACID compliant SQL database with B-Tree indexes",
+  "homepage": "https://github.com/orangesql/orangesql",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2"
+    },
+    {
+      "name": "readline",
+      "platform": "!windows"
+    },
+    {
+      "name": "gtest",
+      "features": ["gmock"]
+    },
+    {
+      "name": "benchmark",
+      "platform": "!windows"
+    },
+    "threads"
+  ],
+  "features": {
+    "jemalloc": {
+      "description": "Use jemalloc for memory allocation",
+      "dependencies": ["jemalloc"]
+    },
+    "uring": {
+      "description": "Enable io_uring support on Linux",
+      "dependencies": ["liburing"],
+      "platform": "linux"
+    },
+    "docs": {
+      "description": "Build documentation",
+      "dependencies": ["doxygen"]
+    }
+  },
+  "default-features": []
+}
