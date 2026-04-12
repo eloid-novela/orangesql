@@ -4,3 +4,9 @@ echo dist/ >> .gitignore
 echo build/ >> .gitignore
 echo __pycache__/ >> .gitignore
 echo venv/ >> .gitignore
+
+.xmake
+build
+.idea
+.cache
+compile_commands.json
